@@ -1,0 +1,58 @@
+*With length = 0.18u , widthn=0.45u, widthp=1.17u
+* SPICE3 file created from inverter180.ext - technology: scmos
+
+.include TSMC_180nm.txt
+.option scale=0.09u
+.param SUPPLY = 1V
+.global vdd gnd
+
+M1000 out in vdd vdd CMOSP w=13 l=2
++  ad=78 pd=38 as=78 ps=38
+M1001 out in gnd Gnd CMOSN w=5 l=2
++  ad=30 pd=22 as=30 ps=22
+C0 vdd in 0.09fF
+C1 in out 0.19fF
+C2 gnd out 0.08fF
+C3 in gnd 0.04fF
+C4 vdd out 0.21fF
+C5 gnd Gnd 0.13fF
+C6 out Gnd 0.09fF
+C7 in Gnd 0.24fF
+C8 vdd Gnd 0.76fF
+
+
+Vdd vdd gnd 1V
+Vin in gnd pulse 0 1V 0 0.01n 0.01n 3n 6n
+
+*** DC characteristics ***
+*Vin in gnd 'SUPPLY'
+*.dc Vin 0 1 0.01
+
+*.measure DC current AVG vdd#branch
+*.measure DC power param= '-(SUPPLY*current)'
+
+
+.tran 0.1n 40n 
+.save all
+
+*Measuring power
+.measure tran current AVG vdd#branch
+.measure tran power param= '-(vdd*current)'
+
+*measuring delays
+.measure tran tplh
++TRIG v(in) VAL='0.50*SUPPLY' FALL=1 TARG v(out) VAL='0.50*SUPPLY' RISE=1
+.measure tran tphl
++TRIG v(in) VAL='0.50*SUPPLY' RISE=1 TARG v(out) VAL='0.50*SUPPLY' FALL=1
+.measure tran tpd
++param='(tplh+tphl)/2' 
+
+.control
+set color0=white
+
+run
+plot V(in) V(out)
+
+*plot deriv(V(out))
+
+.endc
